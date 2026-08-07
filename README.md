@@ -40,6 +40,36 @@ you already have access to via the `libvirt` group, so the app never calls
 
 ---
 
+## Quick start
+
+New to this? Do exactly these four steps, in order. Do not skip the log out.
+
+```bash
+# 1. install dependencies
+sudo apt install -y python3-gi gir1.2-gtk-3.0 virtinst virt-viewer \
+                    libvirt-clients libvirt-daemon-system
+
+# 2. run the setup script (creates the pool, the ISO folder, joins groups)
+chmod +x setup.sh
+./setup.sh
+
+# 3. LOG OUT AND LOG BACK IN. This is not optional. Group membership does not
+#    take effect until you do. If you skip this, the app will not launch.
+
+# 4. start the app
+python3 sandbox-manager-v1_6.py
+```
+
+To make your first sandbox: type a name, paste a Linux ISO download link (or
+click Browse for one you already have), set the disk to at least **40** for a
+full distribution, and click Download & Build. Walk the installer in the window
+that opens. That is it.
+
+If step 4 throws an error, jump to [Troubleshooting](#troubleshooting) below.
+Ninety percent of the time it means you skipped step 3.
+
+---
+
 ## Features
 
 - Build a sandbox from an ISO **URL** or a **local file** (Browse or drag and
@@ -267,6 +297,63 @@ for a feature-by-feature comparison.
   mode toolkit.
 - [`landscape-survey.md`](landscape-survey.md): how this compares to
   existing tools and what is arguably novel.
+
+---
+
+## Common mistakes
+
+These are the things that will bite a first-timer. Read them before you file a
+bug.
+
+- **You skipped the log out after setup.** Group membership does not apply to
+  your current session. Log out and back in, then relaunch.
+- **You set the disk too small.** The disk number is a ceiling. A full Kali or
+  Parrot install needs 40 GB or more. Set it too low and the install fails
+  partway through with "no space left on device." That is not a bug in this
+  tool; it is your ceiling. Delete the box and rebuild with a bigger disk.
+- **You ran the app before `setup.sh`.** The storage pool and ISO folder must
+  exist first. Run `./setup.sh` once.
+- **You pointed at an ISO buried in your home folder.** If you Browse to a file
+  in a private home directory, the app moves it into the shared ISO folder for
+  you. Let it. Do not fight the relocation.
+- **Wi-Fi: you powered the VM off with the adapter still attached.** Always
+  click Detach Wi-Fi first, then shut the VM down. Otherwise the USB port can
+  get stranded and you will have to reseat the adapter or reboot the host.
+- **Wi-Fi: nothing happens on Attach.** The adapter is probably unplugged, or it
+  is not the Atheros AR9271 this ships configured for. Check `lsusb`, and if
+  yours has a different USB ID, change `WIFI_USBID` at the top of the script.
+
+## Troubleshooting
+
+**The app will not launch / errors about libvirt or permissions.**
+You are almost certainly not in the `libvirt` group yet in this session. Run
+`./setup.sh`, then log out and back in. Confirm with `groups` that `libvirt`
+and `kvm` are listed.
+
+**"Storage pool not found" or "Network not found: default."**
+`setup.sh` did not finish, or you have not run it. Run `./setup.sh` again and
+read its output; it tells you what it created or what failed.
+
+**A build fails at "select and install software" or similar.**
+The guest ran out of disk. Your disk ceiling was too small for that
+distribution. Delete the box and rebuild with a larger disk (45 to 50 GB for
+Kali or Parrot).
+
+**The dashboard says OVERSUBSCRIBED in red.**
+Your combined disk ceilings exceed real free space, so filling every box would
+run you out. It is a warning, not a crash. Delete a box, shrink a ceiling, or
+free space. A single box can still run out of its own ceiling independently of
+this.
+
+**The Wi-Fi adapter shows "attached" but the guest cannot use it.**
+libvirt attaching the device is not the same as the guest enumerating it. This
+usually means a flaky physical USB port. Unplug the adapter, reseat it, wait for
+the host to see it cleanly (`lsusb`), then attach again. If the host itself will
+not see it, reboot the host to reset the USB controller.
+
+**The desktop icon (host or guest) does nothing / nags "untrusted launcher."**
+On XFCE, right-click the icon once and choose "Allow Launching." This is a
+one-time trust step the file manager requires.
 
 ---
 
