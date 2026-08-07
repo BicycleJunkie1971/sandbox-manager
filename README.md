@@ -40,8 +40,7 @@ you already have access to via the `libvirt` group, so the app never calls
 > adoption than any paragraph. Suggested: the main window showing the space
 > dashboard, the sandbox list, and the add-a-sandbox panel.
 >
-> `![Sandbox Manager](docs/screenshot.png)`
-Screenshot_2026-08-06_17-41-56.png
+![Sandbox Manager](Screenshot_2026-08-06_17-41-56.png)
 ---
 
 ## Features
