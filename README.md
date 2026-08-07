@@ -34,13 +34,10 @@ you already have access to via the `libvirt` group, so the app never calls
 
 ---
 
-## Screenshots
+## Screenshot
 
-> Add a screenshot or short GIF here. For a GUI tool this does more for
-> adoption than any paragraph. Suggested: the main window showing the space
-> dashboard, the sandbox list, and the add-a-sandbox panel.
->
 ![Sandbox Manager](Screenshot_2026-08-06_17-41-56.png)
+
 ---
 
 ## Features
@@ -174,13 +171,54 @@ uses libvirt `managed='yes'`, so a clean guest shutdown returns the radio to the
 host on its own. **Detach before you power a guest down** to avoid a stranded
 port on abnormal release.
 
-Companion scripts:
+### Host side
 
-- `wifi-vm.sh` (host side): a standalone `attach` / `detach` / `status`
-  command-line equivalent of the in-app button, for scripted or headless use.
-- `wifi-mode.sh` + `install-wifi-mode.sh` (guest side): a one-click
-  monitor/managed toggle that runs without a password. See
-  [`docs/guest-wifi-tools.md`](docs/guest-wifi-tools.md).
+`wifi-vm.sh` is a standalone command-line equivalent of the in-app button, with
+`attach`, `detach`, and `status`, keyed to the same `vendor:product` so a replug
+never breaks it. Use it for scripted or headless workflows:
+
+```bash
+./wifi-vm.sh attach <vm-name>
+./wifi-vm.sh detach <vm-name>
+./wifi-vm.sh status
+```
+
+### Guest side: passwordless monitor/managed toggle
+
+Inside the sandbox, `guest-tools/install-wifi-mode.sh` sets up a one-click
+monitor/managed toggle that runs **without a password on every switch**. Normally
+setting monitor mode needs root, so a naive toggle prompts for a sudo password
+every time. This installs a small root-owned helper plus a scoped, no-password
+sudoers rule for that one helper, so you authenticate once at install and then
+flip modes freely, the same way airgeddon holds root for its whole session.
+
+Run once, inside the guest:
+
+```bash
+bash install-wifi-mode.sh
+```
+
+It installs four pieces: a root-owned `wifi-switch` helper (plain `iw`/`ip`, so it
+does not stomp NetworkManager), a `sudoers.d` rule scoped to that helper and your
+user, a `~/bin/wifi-mode.sh` wrapper, and an XFCE desktop icon. The installer is
+generic: it scopes the rule to whoever runs it, finds the real Desktop directory,
+checks for `iw`/`ip`/`sudo`, defaults to `wlan0` (override with `WIFI_IFACE`), and
+is safe to re-run.
+
+After install, no password ever again:
+
+```bash
+~/bin/wifi-mode.sh            # toggle monitor <-> managed
+~/bin/wifi-mode.sh monitor    # force monitor
+~/bin/wifi-mode.sh managed    # force managed
+~/bin/wifi-mode.sh status     # report current mode
+```
+
+Or click the desktop icon: no terminal opens, and a notification reports the new
+mode. The security of the no-password rule depends on `wifi-switch` staying
+root-owned and not user-writable; the installer sets this, do not loosen it.
+
+Full design notes are in [`guest-wifi-tools.md`](guest-wifi-tools.md).
 
 ---
 
@@ -216,18 +254,18 @@ Sandbox Manager overlaps in spirit with virt-manager, GNOME Boxes, and
 Quickemu, and with Qubes OS on disposability. What is hard to find in a single
 lightweight tool is its specific combination: a desktop oversubscription
 verdict, a self-reclaiming ISO library, and integrated single-adapter
-passthrough with a pay-once guest toggle. See the landscape survey in `docs/`
+passthrough with a pay-once guest toggle. See the landscape survey
 for a feature-by-feature comparison.
 
 ---
 
 ## Documentation
 
-- [`docs/DOCUMENTATION.md`](docs/DOCUMENTATION.md): full project record,
+- [`DOCUMENTATION.md`](DOCUMENTATION.md): full project record,
   inception through v1.6, with the design decisions and field notes.
-- [`docs/guest-wifi-tools.md`](docs/guest-wifi-tools.md): the guest-side Wi-Fi
+- [`guest-wifi-tools.md`](guest-wifi-tools.md): the guest-side Wi-Fi
   mode toolkit.
-- [`docs/landscape-survey.md`](docs/landscape-survey.md): how this compares to
+- [`landscape-survey.md`](landscape-survey.md): how this compares to
   existing tools and what is arguably novel.
 
 ---
