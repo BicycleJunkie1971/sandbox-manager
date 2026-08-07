@@ -50,7 +50,11 @@ else
   echo "ISO library $ISO_LIB already exists."
 fi
 
-echo "Done."
+echo
+echo "Setup done."
 if [ "$NEED_RELOGIN" = 1 ]; then
-  echo "IMPORTANT: log out and back in for libvirt/kvm group membership to take effect."
+  echo "NEXT: log out and log back in now. Group membership will not work until you do."
+  echo "Then run:  python3 sandbox-manager-v1_6.py"
+else
+  echo "NEXT: start the app with:  python3 sandbox-manager-v1_6.py"
 fi
