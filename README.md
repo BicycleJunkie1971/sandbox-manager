@@ -1,3 +1,5 @@
+![GitHub Repo Card](https://githubcard.com/BicycleJunkie1971/sandbox-manager.svg)
+
 # Sandbox Manager
 
 A point-and-click GTK control panel for disposable KVM/libvirt Linux sandboxes.
