@@ -41,7 +41,7 @@ you already have access to via the `libvirt` group, so the app never calls
 > dashboard, the sandbox list, and the add-a-sandbox panel.
 >
 > `![Sandbox Manager](docs/screenshot.png)`
-
+Screenshot_2026-08-06_17-41-56.png
 ---
 
 ## Features
